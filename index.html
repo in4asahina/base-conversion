@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>2進数・10進数・16進数 計算練習ノート</title>
+<title>2進数・10進数・16進数　計算練習ノート</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
@@ -51,6 +51,7 @@ sup{font-size:.62em; font-family:var(--mono)}
 .seg.signsw label{text-align:center; padding:7px 22px; border:1px solid var(--line)}
 .seg.signsw label[for="s0"]{border-radius:6px 0 0 6px; border-right:none}
 .seg.signsw label[for="s1"]{border-radius:0 6px 6px 0; border-right:1px solid var(--line)}
+.seg.signsw .cap .sym{color:var(--ink); font-weight:700}
 .seg.signsw .cap{grid-row:2; text-align:center; font-size:.8rem; color:var(--sub); margin-top:3px}
 .seg.signsw #cap0{grid-column:1} .seg.signsw #cap1{grid-column:2}
 /* 広い画面では説明文を枠の外（下）に重ねて置き、高さを取らないようにする */
@@ -72,6 +73,7 @@ sup{font-size:.62em; font-family:var(--mono)}
   border:2px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);
 }
 #num:focus{outline:none; border-color:#6E9BE8}
+#num::placeholder{color:var(--sub); opacity:.5; font-size:.8em}
 .inrow .base{font-family:var(--mono); font-size:1.1rem; color:var(--sub)}
 .bits{margin-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:.92rem}
 .bits[hidden]{display:none}
@@ -102,6 +104,13 @@ sup{font-size:.62em; font-family:var(--mono)}
 .practice{margin:10px 0 0; padding:12px 14px; border:1px dashed var(--go); border-radius:8px; background:var(--panel)}
 .practice p{margin:4px 0}
 .practice .q{font-family:var(--mono); font-size:1.6rem}
+#reset{
+  display:inline-flex; align-items:center; gap:6px; margin-left:auto;
+  font-family:var(--sans); font-size:.92rem; padding:7px 16px; border-radius:6px; cursor:pointer;
+  background:transparent; color:var(--sub); border:1px solid var(--line);
+}
+#reset:hover{color:var(--ink); border-color:var(--sub)}
+#reset:focus-visible{outline:3px solid #6E9BE8; outline-offset:2px}
 #go:focus-visible, #rnd:focus-visible, .stepctl button:focus-visible{outline:3px solid #6E9BE8; outline-offset:2px}
 .check{display:flex; align-items:center; gap:6px; font-size:.92rem; cursor:pointer}
 .check input{width:18px; height:18px}
@@ -224,7 +233,7 @@ details.alt .proc{margin-top:8px}
 </head>
 <body>
 <main>
-  <h1>2進数・10進数・16進数 計算練習ノート</h1>
+  <h1>2進数・10進数・16進数　計算練習ノート</h1>
   <p class="lead">数を入力して「変換する」を押すと、変換した答えと計算の途中が表示されます。</p>
 
   <section class="panel" aria-label="入力">
@@ -242,7 +251,7 @@ details.alt .proc{margin-top:8px}
       <div class="signsw seg" role="radiogroup" aria-labelledby="lb-sign">
         <input type="radio" name="sign" id="s0" value="0" checked aria-describedby="cap0"><label for="s0">符号なし</label>
         <input type="radio" name="sign" id="s1" value="1" aria-describedby="cap1"><label for="s1">符号あり</label>
-        <span class="cap" id="cap0">（＋・−で表現）</span>
+        <span class="cap" id="cap0">（<b class="sym">＋</b>・<b class="sym">－</b>で表現）</span>
         <span class="cap" id="cap1">（２の補数）</span>
       </div>
       <div class="bits" id="bitsbox" hidden>
@@ -258,7 +267,7 @@ details.alt .proc{margin-top:8px}
     <div class="field">
       <label class="flabel" for="num">数値</label>
       <div class="inrow">
-        <input id="num" type="text" inputmode="text" autocomplete="off" spellcheck="false" value="-25.375">
+        <input id="num" type="text" inputmode="text" autocomplete="off" spellcheck="false" value="">
         <span class="base" id="inbase">(10)</span>
       </div>
     </div>
@@ -272,6 +281,7 @@ details.alt .proc{margin-top:8px}
           <input type="radio" name="lv" id="lv1" value="1"><label for="lv1">発展</label>
         </div>
       </div>
+      <button id="reset" type="button"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>リセット</button>
     </div>
     <label class="check stepline"><input type="checkbox" id="stepmode">計算の途中を1行ずつ表示する</label>
     <p class="error" id="err" role="alert"></p>
@@ -818,11 +828,27 @@ function syncUI(){
   const base = document.querySelector('input[name="base"]:checked').value;
   const signed = document.querySelector('input[name="sign"]:checked').value === "1";
   $("#inbase").textContent = `(${base})`;
+  $("#num").placeholder = {10:"例：-25.375", 2:"例：-11001.011", 16:"例：-19.6"}[base];
   $("#bitsbox").hidden = !signed;
 }
+// 入力欄と表示をまっさらにし、符号なし・標準に戻す
+function clearAll(){
+  $("#num").value = "";
+  $("#err").textContent = "";
+  $("#results").innerHTML = "";
+  $("#procs").innerHTML = "";
+  $("#s0").checked = true;
+  $("#lv0").checked = true;
+  $("#n8").checked = true;
+}
 document.querySelectorAll('input[name="base"]').forEach(r => r.addEventListener("change", () => {
-  syncUI(); $("#err").textContent = "";
+  clearAll(); syncUI();
 }));
+$("#reset").addEventListener("click", () => {
+  $("#b10").checked = true;
+  clearAll(); syncUI();
+  $("#num").focus();
+});
 document.querySelectorAll('input[name="sign"]').forEach(r => r.addEventListener("change", syncUI));
 $("#go").addEventListener("click", run);
 $("#rnd").addEventListener("click", () => {
@@ -841,7 +867,7 @@ $("#rnd").addEventListener("click", () => {
 });
 $("#num").addEventListener("keydown", e => { if(e.key === "Enter") run(); });
 $("#stepmode").addEventListener("change", applyStepMode);
-syncUI(); run();
+syncUI();
 window.addEventListener("resize", drawAllLinks);
 if(document.fonts) document.fonts.ready.then(drawAllLinks);
 </script>
